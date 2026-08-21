@@ -168,6 +168,7 @@ body.stage .progress { background: #ff657b; }
   let autoSuspended = false;
   let resumeTimer = null;
   let pointersDown = 0;
+  let touchesDown = 0;
   let wakeLock = null;
   const setSize = value => {
     size = Math.max(17, Math.min(36, value));
@@ -240,12 +241,13 @@ body.stage .progress { background: #ff657b; }
     if (resumeTimer !== null) clearTimeout(resumeTimer);
     resumeTimer = null;
   };
+  const inputBusy = () => pointersDown > 0 || touchesDown > 0;
   const scheduleResume = (delay = 500) => {
     if (!autoRunning || !autoSuspended) return;
     if (resumeTimer !== null) clearTimeout(resumeTimer);
     resumeTimer = setTimeout(() => {
       resumeTimer = null;
-      if (!autoRunning || pointersDown > 0) return;
+      if (!autoRunning || inputBusy()) return;
       autoSuspended = false;
       autoPosition = scrollY;
       autoApplied = -1;
@@ -300,23 +302,36 @@ body.stage .progress { background: #ff657b; }
     progress.style.width = (max > 0 ? scrollY / max * 100 : 0) + '%';
     if (autoRunning && autoSuspended) {
       autoPosition = scrollY;
-      if (pointersDown === 0) scheduleResume();
+      if (!inputBusy()) scheduleResume();
     }
   };
   const fromToolbar = target => !!(target && target.closest && target.closest('.toolbar'));
   addEventListener('pointerdown', event => {
-    if (fromToolbar(event.target)) return;
+    if (event.pointerType === 'touch' || fromToolbar(event.target)) return;
     pointersDown += 1;
     suspendAuto();
   }, {passive:true, capture:true});
-  const releasePointer = () => {
+  const releasePointer = event => {
+    if (event.pointerType === 'touch') return;
     pointersDown = Math.max(0, pointersDown - 1);
-    if (pointersDown === 0) scheduleResume();
+    if (!inputBusy()) scheduleResume();
   };
   addEventListener('pointerup', releasePointer, {passive:true, capture:true});
   addEventListener('pointercancel', releasePointer, {passive:true, capture:true});
+  addEventListener('touchstart', event => {
+    if (fromToolbar(event.target)) return;
+    touchesDown = event.touches.length;
+    suspendAuto();
+  }, {passive:true, capture:true});
+  addEventListener('touchmove', () => { if (touchesDown > 0) suspendAuto(); }, {passive:true, capture:true});
+  const releaseTouch = event => {
+    touchesDown = event.touches.length;
+    if (!inputBusy()) scheduleResume();
+  };
+  addEventListener('touchend', releaseTouch, {passive:true, capture:true});
+  addEventListener('touchcancel', releaseTouch, {passive:true, capture:true});
   addEventListener('wheel', () => { suspendAuto(); scheduleResume(700); }, {passive:true});
-  addEventListener('scrollend', () => { if (pointersDown === 0) scheduleResume(150); });
+  addEventListener('scrollend', () => { if (!inputBusy()) scheduleResume(150); });
   addEventListener('scroll', updateProgress, {passive:true});
   addEventListener('resize', updateProgress);
   updateProgress();
