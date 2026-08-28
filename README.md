@@ -26,11 +26,9 @@ regolazione si ritirano e restano pausa, velocità e la fascia.
 
 ## Stato del testo
 
-Il testo è stato confrontato con le pagine 1, 2, 3, 5 e 6 del copione
-cartaceo: coincide parola per parola, comprese tutte le indicazioni musicali.
-La pagina 4 non è ancora stata fotografata; il suo contenuto è confermato in
-trasparenza attraverso il foglio precedente, ma l'attacco della III lettura
-(`MUSICA ca. 30''`) resta senza annotazioni a mano.
+Il testo è stato confrontato con tutte e sei le pagine del copione cartaceo:
+coincide parola per parola, comprese tutte le indicazioni musicali, e ogni
+indicazione porta le annotazioni scritte a mano.
 
 ## Modifiche
 
