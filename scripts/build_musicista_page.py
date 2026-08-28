@@ -1,12 +1,29 @@
+"""Ricostruisce il solo testo del copione musicista dal file dell'attrice.
+
+Documenta la trasformazione fatta la prima volta, partendo dal layout della
+pagina live. Da allora la pagina ha guadagnato un secondo strato, che questo
+script non conosce: le annotazioni musicali scritte a mano sul copione
+cartaceo, la fascia dei riferimenti e i relativi stili. Rieseguirlo
+riscriverebbe <main> perdendo quelle annotazioni, quindi si ferma da solo se
+la pagina le contiene gia'.
+"""
+
 from __future__ import annotations
 
 from html import escape
 from pathlib import Path
 import re
+import sys
 
 
 ROOT = Path(__file__).resolve().parents[1]
 INDEX = ROOT / "index.html"
+
+if 'id="hud"' in INDEX.read_text(encoding="utf-8"):
+    sys.exit(
+        "index.html contiene gia' le annotazioni del musicista: questo script "
+        "le cancellerebbe. Modifica index.html a mano."
+    )
 
 
 def p(text: str, dialogue: bool = False) -> str:
